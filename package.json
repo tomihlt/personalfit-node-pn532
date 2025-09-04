@@ -6,8 +6,10 @@
   "author": "Sean Lynch <techniq35@gmail.com>",
   "license": "MIT",
   "main": "src/pn532.js",
-  "devDependencies": {},
   "dependencies": {
+    "ndef": "^0.2.0",
+    "pn532": "^1.0.0",
+    "serialport": "^13.0.0",
     "winston": "^0.8.0"
   },
   "engine": {

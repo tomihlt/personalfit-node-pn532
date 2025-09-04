@@ -1,7 +1,6 @@
 var pn532 = require('../src/pn532');
-var SerialPort = require('serialport');
-
-var serialPort = new SerialPort('/dev/tty.usbserial-AFWR836M', { baudRate: 115200 });
+const { SerialPort } = require('serialport');
+const serialPort = new SerialPort({ path: 'COM3', baudRate: 115200 });
 var rfid = new pn532.PN532(serialPort, { pollInterval: 3000 });
 var ndef = require('ndef');
 
@@ -13,14 +12,20 @@ rfid.on('ready', function() {
         console.log('Tag', tag);
 
         console.log('Authenticating...');
-        rfid.authenticateBlock(tag.uid).then(function() {
-            console.log('Reading tag data...');
-            rfid.readData().then(function(data) {
-                console.log('Tag data:', data);
-
-                var records = ndef.decodeMessage(data.toJSON());
-                console.log(records);
+        // Autentica el bloque 4 (sector 1, bloque 0)
+        rfid.authenticateBlock(tag.uid, { blockAddress: 4 }).then(function(authBody) {
+            console.log('Authentication response:', authBody);
+            // Si la autenticación fue exitosa, lee el bloque
+            rfid.readBlock({ blockAddress: 4 }).then(function(data) {
+                console.log('Tag block 4 data:', data);
+                // Si quieres decodificar con ndef:
+                // var records = ndef.decodeMessage(Array.from(data));
+                // console.log(records);
+            }).catch(function(err) {
+                console.error('Error reading block:', err);
             });
+        }).catch(function(err) {
+            console.error('Authentication error:', err);
         });
     });
 });
